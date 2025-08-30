@@ -109,8 +109,7 @@ public class VersmentDialog extends JDialog {
         remainingAmountLabel = new JLabel("Montant restant: -- DA");
         remainingAmountLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         remainingAmountLabel.setForeground(new Color(46, 125, 50));
-        formPanel.add(new JLabel("Info:"));
-        formPanel.add(remainingAmountLabel);
+        addFormField(formPanel, "Info:", remainingAmountLabel);
 
         // Amount field
         addFormField(formPanel, "Montant*:", montantField = new JTextField());

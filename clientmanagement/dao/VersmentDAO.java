@@ -13,7 +13,7 @@ public class VersmentDAO {
     // Get all versments
     public List<Versment> getAllVersments() {
         List<Versment> versments = new ArrayList<>();
-        String sql = "SELECT * FROM versement ";
+        String sql = "SELECT * FROM versments ORDER BY date_paiement DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -33,7 +33,7 @@ public class VersmentDAO {
     // Get versments by client ID
     public List<Versment> getVersmentsByClientId(int clientId) {
         List<Versment> versments = new ArrayList<>();
-        String sql = "SELECT * FROM versment WHERE client_id = ? ORDER BY date_paiement DESC";
+        String sql = "SELECT * FROM versments WHERE client_id = ? ORDER BY date_paiement DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -55,7 +55,7 @@ public class VersmentDAO {
 
     // Insert new versment and return the generated ID
     public int insertVersment(Versment versment) {
-        String sql = "INSERT INTO versement (client_id, montant, type, date_paiement, annee_concernee, created_at) "
+        String sql = "INSERT INTO versments (client_id, montant, type, date_paiement, annee_concernee, created_at) "
                 + "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -90,7 +90,7 @@ public class VersmentDAO {
 
     // Update versment
     public boolean updateVersment(Versment versment) {
-        String sql = "UPDATE versement SET client_id=?, montant=?, type=?, date_paiement=?, annee_concernee=? "
+        String sql = "UPDATE versments SET client_id=?, montant=?, type=?, date_paiement=?, annee_concernee=? "
                 + "WHERE id=?";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -113,7 +113,7 @@ public class VersmentDAO {
 
     // Delete versment
     public boolean deleteVersmentById(int id) {
-        String sql = "DELETE FROM versement WHERE id=?";
+        String sql = "DELETE FROM versments WHERE id=?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -129,7 +129,7 @@ public class VersmentDAO {
 
     // Get versment by ID
     public Versment getVersmentById(int id) {
-        String sql = "SELECT * FROM versement WHERE id = ?";
+        String sql = "SELECT * FROM versments WHERE id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -151,7 +151,7 @@ public class VersmentDAO {
 
     // Get total versments amount by client ID
     public BigDecimal getTotalVersmentsByClientId(int clientId) {
-        String sql = "SELECT SUM(montant) as total FROM versement WHERE client_id = ?";
+        String sql = "SELECT SUM(montant) as total FROM versments WHERE client_id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
