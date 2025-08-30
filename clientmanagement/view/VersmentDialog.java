@@ -258,6 +258,10 @@ public class VersmentDialog extends JDialog {
     }
 
     private void updateRemainingAmountPreview() {
+        if (remainingAmountLabel == null) {
+            return;
+        }
+        
         Object selected = clientComboBox.getSelectedItem();
         if (selected instanceof ClientItem) {
             ClientItem selectedClient = (ClientItem) selected;
