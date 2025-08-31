@@ -26,7 +26,6 @@ public class ClientForm extends JFrame {
 
     // Filter components
     private JTextField searchField;
-    private JComboBox<String> typeFilterCombo;
     private JTextField minAmountField, maxAmountField;
     private JXDatePicker fromDatePicker, toDatePicker;
 
@@ -174,21 +173,11 @@ public class ClientForm extends JFrame {
         });
         filterPanel.add(searchField, gbc);
 
-        // Type Filter
+        // Amount Range
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0;
-        filterPanel.add(new JLabel("Client Type:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        typeFilterCombo = new JComboBox<>(new String[] { "All Types", "Type A", "Type B", "Type C" });
-        filterPanel.add(typeFilterCombo, gbc);
-
-        // Amount Range
-        gbc.gridx = 0;
-        gbc.gridy = 2;
         filterPanel.add(new JLabel("Annual Amount:"), gbc);
 
         gbc.gridx = 1;
@@ -204,7 +193,7 @@ public class ClientForm extends JFrame {
 
         // Date Range
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 2;
         filterPanel.add(new JLabel("Created Between:"), gbc);
 
         gbc.gridx = 1;
@@ -221,20 +210,16 @@ public class ClientForm extends JFrame {
 
         // Action Buttons
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 3;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
 
         JButton applyFilterButton = new JButton("Apply Filters");
         JButton clearFilterButton = new JButton("Clear Filters");
-        JButton advancedFilterButton = new JButton("Advanced...");
-        JButton toggleThemeButton = new JButton("🌓 Toggle Theme");
 
         buttonPanel.add(applyFilterButton);
         buttonPanel.add(clearFilterButton);
-        buttonPanel.add(advancedFilterButton);
-        buttonPanel.add(toggleThemeButton);
         filterPanel.add(buttonPanel, gbc);
 
         // Add action listeners
@@ -242,16 +227,12 @@ public class ClientForm extends JFrame {
 
         clearFilterButton.addActionListener(e -> {
             searchField.setText("");
-            typeFilterCombo.setSelectedIndex(0);
             minAmountField.setText("");
             maxAmountField.setText("");
             fromDatePicker.setDate(null);
             toDatePicker.setDate(null);
             sorter.setRowFilter(null);
         });
-
-        advancedFilterButton.addActionListener(e -> showAdvancedFilterDialog());
-        toggleThemeButton.addActionListener(e -> toggleTheme());
 
         return filterPanel;
     }
@@ -266,12 +247,6 @@ public class ClientForm extends JFrame {
                     RowFilter.regexFilter("(?i)" + searchText, COL_NOM),
                     RowFilter.regexFilter("(?i)" + searchText, COL_ACTIVITE),
                     RowFilter.regexFilter("(?i)" + searchText, COL_COMPANY))));
-        }
-
-        // Type Filter
-        if (typeFilterCombo.getSelectedIndex() > 0) {
-            String selectedType = (String) typeFilterCombo.getSelectedItem();
-            filters.add(RowFilter.regexFilter("^" + selectedType + "$", COL_TYPE));
         }
 
         // Amount Range Filter
@@ -317,81 +292,6 @@ public class ClientForm extends JFrame {
         } else {
             sorter.setRowFilter(null);
         }
-    }
-
-    private void showAdvancedFilterDialog() {
-        JDialog dialog = new JDialog(this, "Advanced Filters", true);
-        dialog.setLayout(new BorderLayout());
-
-        JPanel formPanel = new JPanel(new GridLayout(0, 2, 10, 5));
-
-        JTextField specificActivityField = new JTextField();
-        JComboBox<String> regimeCombo = new JComboBox<>(new String[] { "Any", "Regime A", "Regime B" });
-        JCheckBox newClientsOnly = new JCheckBox("New Clients Only (Last 30 days)");
-
-        formPanel.add(new JLabel("Specific Activity:"));
-        formPanel.add(specificActivityField);
-        formPanel.add(new JLabel("Fiscal Regime:"));
-        formPanel.add(regimeCombo);
-        formPanel.add(new JLabel(""));
-        formPanel.add(newClientsOnly);
-
-        JButton applyButton = new JButton("Apply");
-        applyButton.addActionListener(e -> {
-            List<RowFilter<Object, Object>> newFilters = new ArrayList<>();
-
-            // Get current filter and add it to new filters
-            RowFilter<? super DefaultTableModel, ? super Integer> currentFilter = sorter.getRowFilter();
-            if (currentFilter != null) {
-                newFilters.add((RowFilter<Object, Object>) currentFilter);
-            }
-
-            // Add specific activity filter if specified
-            if (!specificActivityField.getText().isEmpty()) {
-                newFilters.add(RowFilter.regexFilter(
-                        "(?i)" + specificActivityField.getText(),
-                        COL_ACTIVITE));
-            }
-
-            // Add regime filter if specified
-            if (regimeCombo.getSelectedIndex() > 0) {
-                newFilters.add(RowFilter.regexFilter(
-                        "^" + regimeCombo.getSelectedItem() + "$",
-                        COL_REGIME_FISCAL));
-            }
-
-            // Add new clients filter if checked
-            if (newClientsOnly.isSelected()) {
-                newFilters.add(new RowFilter<Object, Object>() {
-                    @Override
-                    public boolean include(Entry<?, ?> entry) {
-                        try {
-                            String dateStr = (String) entry.getValue(COL_CREATED_AT);
-                            Date recordDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateStr);
-                            Date thirtyDaysAgo = new Date(System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000));
-                            return recordDate.after(thirtyDaysAgo);
-                        } catch (Exception ex) {
-                            return false;
-                        }
-                    }
-                });
-            }
-
-            // Apply the new filters
-            if (!newFilters.isEmpty()) {
-                sorter.setRowFilter(RowFilter.andFilter(newFilters));
-            } else {
-                sorter.setRowFilter(null);
-            }
-
-            dialog.dispose();
-        });
-
-        dialog.add(formPanel, BorderLayout.CENTER);
-        dialog.add(applyButton, BorderLayout.SOUTH);
-        dialog.pack();
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
     }
 
     private void setupButtons() {
@@ -565,20 +465,6 @@ public class ClientForm extends JFrame {
                 JOptionPane.showMessageDialog(this, "Erreur lors de la suppression: " + e.getMessage(), "Erreur",
                         JOptionPane.ERROR_MESSAGE);
             }
-        }
-    }
-
-    private void toggleTheme() {
-        try {
-            if (isDarkMode) {
-                UIManager.setLookAndFeel(new FlatLightLaf());
-            } else {
-                UIManager.setLookAndFeel(new FlatDarkLaf());
-            }
-            SwingUtilities.updateComponentTreeUI(this);
-            isDarkMode = !isDarkMode;
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
 
