@@ -141,10 +141,17 @@ public class VersmentPanel extends JPanel {
     private void setupContextMenu() {
         contextMenu = new JPopupMenu();
         
-        JMenuItem printReceiptItem = new JMenuItem("Imprimer bon de versement");
+        JMenuItem printReceiptItem = new JMenuItem("🖨️ Imprimer bon de versement");
+        printReceiptItem.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         printReceiptItem.addActionListener(e -> printVersmentReceipt());
         
+        JMenuItem viewDetailsItem = new JMenuItem("👁️ Voir détails");
+        viewDetailsItem.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        viewDetailsItem.addActionListener(e -> showVersmentDetails());
+        
         contextMenu.add(printReceiptItem);
+        contextMenu.addSeparator();
+        contextMenu.add(viewDetailsItem);
         
         // Add mouse listener to table for right-click
         versmentTable.addMouseListener(new MouseAdapter() {
@@ -176,25 +183,37 @@ public class VersmentPanel extends JPanel {
         Versment versment = versmentController.getVersmentById(versmentId);
 
         if (versment != null) {
-            // Here you would implement the actual printing logic
-            // For now, we'll just show a confirmation dialog
             Client client = clientController.getClientById(versment.getClientId());
-            String clientName = client != null ? client.getNom() + " " + client.getPrenom() : "Client inconnu";
             
-            String receiptText = "Bon de Versement\n\n" +
-                    "Client: " + clientName + "\n" +
-                    "Montant: " + versment.getMontant() + " DA\n" +
-                    "Type: " + versment.getType() + "\n" +
-                    "Date Paiement: " + versment.getDatePaiement().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "\n" +
-                    "Année Concernée: " + versment.getAnneeConcernee() + "\n\n" +
-                    "Merci pour votre confiance!";
-            
-            JOptionPane.showMessageDialog(this, receiptText, "Bon de Versement - Prévisualisation", JOptionPane.INFORMATION_MESSAGE);
-            
-            // In a real application, you would:
-            // 1. Create a proper receipt template
-            // 2. Use a printing API (like Java's PrinterJob)
-            // 3. Handle the actual printing process
+            if (client != null) {
+                // Show options dialog
+                String[] options = {"🖨️ Imprimer directement", "👁️ Aperçu avant impression", "Annuler"};
+                int choice = JOptionPane.showOptionDialog(this,
+                    "Comment souhaitez-vous procéder?",
+                    "Options d'impression",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[1]);
+                
+                VersmentReceiptPrinter printer = new VersmentReceiptPrinter(versment, client);
+                
+                switch (choice) {
+                    case 0: // Print directly
+                        printer.printReceipt();
+                        break;
+                    case 1: // Show preview
+                        printer.showPreview();
+                        break;
+                    // case 2 or default: Cancel - do nothing
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Impossible de trouver les informations du client", 
+                    "Erreur", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -350,6 +369,38 @@ public class VersmentPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Erreur lors de la suppression", "Erreur",
                         JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+    
+    private void showVersmentDetails() {
+        int selectedRow = versmentTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner un versement", "Avertissement",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int modelRow = versmentTable.convertRowIndexToModel(selectedRow);
+        int versmentId = (Integer) tableModel.getValueAt(modelRow, 0);
+        Versment versment = versmentController.getVersmentById(versmentId);
+
+        if (versment != null) {
+            Client client = clientController.getClientById(versment.getClientId());
+            String clientName = client != null ? 
+                (client.getNom() + (client.getPrenom() != null ? " " + client.getPrenom() : "")) : 
+                "Client inconnu";
+            
+            String details = "📋 DÉTAILS DU VERSEMENT\n\n" +
+                    "🆔 ID: " + versment.getId() + "\n" +
+                    "👤 Client: " + clientName + "\n" +
+                    "💰 Montant: " + versment.getMontant() + " DA\n" +
+                    "📝 Type: " + versment.getType() + "\n" +
+                    "📅 Date de paiement: " + versment.getDatePaiement().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "\n" +
+                    "📆 Année concernée: " + versment.getAnneeConcernee() + "\n" +
+                    "🕒 Créé le: " + (versment.getCreatedAt() != null ? 
+                        versment.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm")) : "N/A");
+            
+            JOptionPane.showMessageDialog(this, details, "Détails du versement", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }
