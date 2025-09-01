@@ -10,7 +10,8 @@ import java.time.format.DateTimeFormatter;
 
 public class ClientDialog extends JDialog {
     private JTextField nomField, activiteField, anneeField;
-    private JTextField formeJuridiqueField, regimeFiscalField, regimeCnasField;
+    private JComboBox<String> formeJuridiqueCombo, regimeFiscalCombo;
+    private JTextField regimeCnasField;
     private JTextField recetteImpotsField, observationField, sourceField;
     private JTextField honorairesMoisField, montantAnnualField, phoneField;
     private JTextField companyField, addressField, typeField, premierVersementField;
@@ -37,8 +38,27 @@ public class ClientDialog extends JDialog {
         nomField = createFieldWithPlaceholder("Entrez le nom du client");
         activiteField = createFieldWithPlaceholder("Activité principale");
         anneeField = createFieldWithPlaceholder("Année d'activité");
-        formeJuridiqueField = createFieldWithPlaceholder("Forme juridique");
-        regimeFiscalField = createFieldWithPlaceholder("Régime fiscal");
+        
+        // Create dropdown for Forme Juridique
+        formeJuridiqueCombo = new JComboBox<>(new String[]{
+            "", "Individual", "SARL"
+        });
+        formeJuridiqueCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        formeJuridiqueCombo.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
+        
+        // Create dropdown for Régime Fiscal
+        regimeFiscalCombo = new JComboBox<>(new String[]{
+            "", "IFU", "Radié", "Réel"
+        });
+        regimeFiscalCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        regimeFiscalCombo.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
+        
         regimeCnasField = createFieldWithPlaceholder("Régime CNAS");
         recetteImpotsField = createFieldWithPlaceholder("Recette impôts");
         observationField = createFieldWithPlaceholder("Observations");
@@ -59,8 +79,8 @@ public class ClientDialog extends JDialog {
         addFieldWithLabel(formPanel, "Nom*:", nomField);
         addFieldWithLabel(formPanel, "Activité*:", activiteField);
         addFieldWithLabel(formPanel, "Année:", anneeField);
-        addFieldWithLabel(formPanel, "Forme Juridique:", formeJuridiqueField);
-        addFieldWithLabel(formPanel, "Régime Fiscal:", regimeFiscalField);
+        addFieldWithLabelCombo(formPanel, "Forme Juridique:", formeJuridiqueCombo);
+        addFieldWithLabelCombo(formPanel, "Régime Fiscal:", regimeFiscalCombo);
         addFieldWithLabel(formPanel, "Régime CNAS:", regimeCnasField);
         addFieldWithLabel(formPanel, "Recette Impôts:", recetteImpotsField);
         addFieldWithLabel(formPanel, "Observation:", observationField);
@@ -118,6 +138,19 @@ public class ClientDialog extends JDialog {
         
         panel.add(fieldPanel);
     }
+    
+    private void addFieldWithLabelCombo(JPanel panel, String labelText, JComboBox<String> combo) {
+        JPanel fieldPanel = new JPanel(new BorderLayout(10, 0));
+        
+        JLabel label = new JLabel(labelText);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        label.setPreferredSize(new Dimension(150, 30)); // Fixed width for alignment
+        
+        fieldPanel.add(label, BorderLayout.WEST);
+        fieldPanel.add(combo, BorderLayout.CENTER);
+        
+        panel.add(fieldPanel);
+    }
 
     private void addNumericValidation(JTextField field) {
         field.addKeyListener(new KeyAdapter() {
@@ -136,8 +169,8 @@ public class ClientDialog extends JDialog {
         setFieldText(nomField, client.getNom());
         setFieldText(activiteField, client.getActivite());
         setFieldText(anneeField, client.getAnnee());
-        setFieldText(formeJuridiqueField, client.getFormeJuridique());
-        setFieldText(regimeFiscalField, client.getRegimeFiscal());
+        setComboSelection(formeJuridiqueCombo, client.getFormeJuridique());
+        setComboSelection(regimeFiscalCombo, client.getRegimeFiscal());
         setFieldText(regimeCnasField, client.getRegimeCnas());
         setFieldText(recetteImpotsField, client.getRecetteImpots());
         setFieldText(observationField, client.getObservation());
@@ -154,6 +187,25 @@ public class ClientDialog extends JDialog {
     private void setFieldText(JTextField field, String text) {
         if (text != null && !text.isEmpty()) {
             field.setText(text);
+        }
+    }
+    
+    private void setComboSelection(JComboBox<String> combo, String value) {
+        if (value != null && !value.isEmpty()) {
+            // Try to find exact match first
+            for (int i = 0; i < combo.getItemCount(); i++) {
+                if (value.equals(combo.getItemAt(i))) {
+                    combo.setSelectedIndex(i);
+                    return;
+                }
+            }
+            // If no exact match, try case-insensitive
+            for (int i = 0; i < combo.getItemCount(); i++) {
+                if (value.equalsIgnoreCase(combo.getItemAt(i))) {
+                    combo.setSelectedIndex(i);
+                    return;
+                }
+            }
         }
     }
 
@@ -205,8 +257,8 @@ public class ClientDialog extends JDialog {
         c.setNom(nomField.getText().trim());
         c.setActivite(activiteField.getText().trim());
         c.setAnnee(anneeField.getText().trim());
-        c.setFormeJuridique(formeJuridiqueField.getText().trim());
-        c.setRegimeFiscal(regimeFiscalField.getText().trim());
+        c.setFormeJuridique((String) formeJuridiqueCombo.getSelectedItem());
+        c.setRegimeFiscal((String) regimeFiscalCombo.getSelectedItem());
         c.setRegimeCnas(regimeCnasField.getText().trim());
         c.setRecetteImpots(recetteImpotsField.getText().trim());
         c.setObservation(observationField.getText().trim());
