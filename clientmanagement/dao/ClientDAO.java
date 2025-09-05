@@ -9,19 +9,19 @@ import java.util.List;
 public class ClientDAO {
     private static final String SELECT_ALL = "SELECT id, nom, activite, annee, forme_juridique, " +
             "regime_fiscal, regime_cnas, recette_impots, observation, source, honoraires_mois, " +
-            "(honoraires_mois * 12) as montant, phone, company, address, type, premier_versement, " +
+            "(honoraires_mois * 12) as montant, phone, company, " +
             "created_at, updated_at " +
             "FROM clients ORDER BY nom";
 
     private static final String INSERT = "INSERT INTO clients (nom, activite, annee, " +
             "forme_juridique, regime_fiscal, regime_cnas, recette_impots, observation, " +
-            "source, honoraires_mois, montant, phone, company, address, type, premier_versement) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "source, honoraires_mois, montant, phone, company) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE = "UPDATE clients SET nom=?, activite=?, annee=?, " +
             "forme_juridique=?, regime_fiscal=?, regime_cnas=?, recette_impots=?, " +
             "observation=?, source=?, honoraires_mois=?, montant=?, phone=?, company=?, " +
-            "address=?, type=?, premier_versement=?, updated_at=CURRENT_TIMESTAMP WHERE id=?";
+            "updated_at=CURRENT_TIMESTAMP WHERE id=?";
 
     private static final String DELETE = "DELETE FROM clients WHERE id=?";
     private static final String SELECT_BY_ID = "SELECT * FROM clients WHERE id = ?";
@@ -72,7 +72,7 @@ public class ClientDAO {
                 PreparedStatement stmt = conn.prepareStatement(UPDATE)) {
 
             setCommonParameters(stmt, client);
-            stmt.setInt(17, client.getId());
+            stmt.setInt(14, client.getId());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -146,9 +146,6 @@ public class ClientDAO {
         stmt.setObject(11, montantAnnual, Types.DECIMAL);
         stmt.setString(12, client.getPhone());
         stmt.setString(13, client.getCompany());
-        stmt.setString(14, client.getAddress());
-        stmt.setString(15, client.getType());
-        stmt.setString(16, client.getPremierVersement());
     }
 
     private Double calculateAnnualAmount(String honorairesMois) {
@@ -183,9 +180,6 @@ public class ClientDAO {
 
         client.setPhone(rs.getString("phone"));
         client.setCompany(rs.getString("company"));
-        client.setAddress(rs.getString("address"));
-        client.setType(rs.getString("type"));
-        client.setPremierVersement(rs.getString("premier_versement"));
         client.setCreatedAt(rs.getString("created_at"));
         client.setUpdatedAt(rs.getString("updated_at"));
 

@@ -68,9 +68,6 @@ public class ClientDialog extends JDialog {
         montantRestantField = createFieldWithPlaceholder("Montant restant");
         phoneField = createFieldWithPlaceholder("Numéro de téléphone");
         companyField = createFieldWithPlaceholder("Nom de l'entreprise");
-        addressField = createFieldWithPlaceholder("Adresse");
-        typeField = createFieldWithPlaceholder("Type de client");
-        premierVersementField = createFieldWithPlaceholder("Premier versement");
 
         // Add numeric validation where needed
         addNumericValidation(montantAnnualField);
@@ -92,9 +89,6 @@ public class ClientDialog extends JDialog {
         addFieldWithLabel(formPanel, "Montant Restant:", montantRestantField);
         addFieldWithLabel(formPanel, "Téléphone:", phoneField);
         addFieldWithLabel(formPanel, "Entreprise:", companyField);
-        addFieldWithLabel(formPanel, "Adresse:", addressField);
-        addFieldWithLabel(formPanel, "Type:", typeField);
-        addFieldWithLabel(formPanel, "Premier Versement:", premierVersementField);
 
         JScrollPane scrollPane = new JScrollPane(formPanel);
         add(scrollPane, BorderLayout.CENTER);
@@ -196,9 +190,6 @@ public class ClientDialog extends JDialog {
         
         setFieldText(phoneField, client.getPhone());
         setFieldText(companyField, client.getCompany());
-        setFieldText(addressField, client.getAddress());
-        setFieldText(typeField, client.getType());
-        setFieldText(premierVersementField, client.getPremierVersement());
     }
 
     private void setFieldText(JTextField field, String text) {
@@ -296,9 +287,6 @@ public class ClientDialog extends JDialog {
         
         c.setPhone(phoneField.getText().trim());
         c.setCompany(companyField.getText().trim());
-        c.setAddress(addressField.getText().trim());
-        c.setType(typeField.getText().trim());
-        c.setPremierVersement(premierVersementField.getText().trim());
         
         String currentDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
         if (client == null) {

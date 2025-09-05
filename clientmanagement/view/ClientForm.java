@@ -48,10 +48,7 @@ public class ClientForm extends JFrame {
     private static final int COL_MONTANT = 11;
     private static final int COL_TELEPHONE = 12;
     private static final int COL_COMPANY = 13;
-    private static final int COL_ADDRESS = 14;
-    private static final int COL_TYPE = 15;
-    private static final int COL_PREMIER_VERSEMENT = 16;
-    private static final int COL_CREATED_AT = 17;
+    private static final int COL_CREATED_AT = 14;
 
     public ClientForm() {
         FlatLightLaf.setup();
@@ -78,8 +75,7 @@ public class ClientForm extends JFrame {
                 "ID", "Nom", "Activité", "Année",
                 "Forme Juridique", "Régime Fiscal", "Régime CNAS",
                 "Recette Impôts", "Observation", "Source",
-                "Honoraires/Mois", "Montant Annual", "Montant Restant", "Téléphone",
-                "Type", "Premier Versement", "Created At"
+                "Honoraires/Mois", "Montant Annual", "Montant Restant", "Téléphone", "Created At"
         };
 
         tableModel = new DefaultTableModel(columnNames, 0) {
@@ -366,8 +362,7 @@ public class ClientForm extends JFrame {
                 c.getId(), c.getNom(), c.getActivite(), c.getAnnee(),
                 c.getFormeJuridique(), c.getRegimeFiscal(), c.getRegimeCnas(),
                 c.getRecetteImpots(), c.getObservation(), c.getSource(),
-                c.getHonorairesMois(), c.getMontant(), remainingAmountStr, c.getPhone(),
-                c.getType(), c.getPremierVersement(), c.getCreatedAt()
+                c.getHonorairesMois(), c.getMontant(), remainingAmountStr, c.getPhone(), c.getCreatedAt()
         };
     }
 
