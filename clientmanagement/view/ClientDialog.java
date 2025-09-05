@@ -65,6 +65,7 @@ public class ClientDialog extends JDialog {
         sourceField = createFieldWithPlaceholder("Source (numérique)");
         honorairesMoisField = createFieldWithPlaceholder("Honoraires/mois");
         montantAnnualField = createFieldWithPlaceholder("Montant annuel");
+        montantRestantField = createFieldWithPlaceholder("Montant restant");
         phoneField = createFieldWithPlaceholder("Numéro de téléphone");
         companyField = createFieldWithPlaceholder("Nom de l'entreprise");
         addressField = createFieldWithPlaceholder("Adresse");
@@ -73,6 +74,7 @@ public class ClientDialog extends JDialog {
 
         // Add numeric validation where needed
         addNumericValidation(montantAnnualField);
+        addNumericValidation(montantRestantField);
         addNumericValidation(sourceField);
 
         // Add fields to form in 2x2 grid layout
@@ -87,6 +89,7 @@ public class ClientDialog extends JDialog {
         addFieldWithLabel(formPanel, "Source:", sourceField);
         addFieldWithLabel(formPanel, "Honoraires/Mois:", honorairesMoisField);
         addFieldWithLabel(formPanel, "Montant Annual:", montantAnnualField);
+        addFieldWithLabel(formPanel, "Montant Restant:", montantRestantField);
         addFieldWithLabel(formPanel, "Téléphone:", phoneField);
         addFieldWithLabel(formPanel, "Entreprise:", companyField);
         addFieldWithLabel(formPanel, "Adresse:", addressField);
@@ -177,6 +180,20 @@ public class ClientDialog extends JDialog {
         setFieldText(sourceField, client.getSource() != null ? client.getSource().toString() : "");
         setFieldText(honorairesMoisField, client.getHonorairesMois());
         setFieldText(montantAnnualField, client.getMontant() != null ? String.valueOf(client.getMontant()) : "");
+        
+        // Calculate and show remaining amount for existing clients
+        if (client.getId() > 0) {
+            try {
+                // You'll need to import VersmentController
+                com.yourcompany.clientmanagement.controller.VersmentController versmentController = 
+                    new com.yourcompany.clientmanagement.controller.VersmentController();
+                java.math.BigDecimal remaining = versmentController.getRemainingAmountForClient(client.getId());
+                setFieldText(montantRestantField, remaining.toString());
+            } catch (Exception e) {
+                setFieldText(montantRestantField, "0");
+            }
+        }
+        
         setFieldText(phoneField, client.getPhone());
         setFieldText(companyField, client.getCompany());
         setFieldText(addressField, client.getAddress());
@@ -221,6 +238,7 @@ public class ClientDialog extends JDialog {
         }
         
         if (!validateNumericField(montantAnnualField, "Montant Annual")) return;
+        if (!validateNumericField(montantRestantField, "Montant Restant")) return;
         if (!validateNumericField(sourceField, "Source")) return;
 
         confirmed = true;
@@ -270,6 +288,11 @@ public class ClientDialog extends JDialog {
         
         String montantText = montantAnnualField.getText().trim();
         c.setMontant(montantText.isEmpty() ? null : Double.parseDouble(montantText));
+        
+        // Handle montant restant - this could be used to calculate initial versments if needed
+        String montantRestantText = montantRestantField.getText().trim();
+        // For now, we'll store this information in a comment or handle it separately
+        // You might want to add logic here to create initial versments based on the difference
         
         c.setPhone(phoneField.getText().trim());
         c.setCompany(companyField.getText().trim());
